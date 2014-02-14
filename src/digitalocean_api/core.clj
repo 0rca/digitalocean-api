@@ -1,25 +1,59 @@
 (ns digitalocean-api.core
+  (:require [clojure.walk :as w])
   (:require [clj-http.client :as client]))
 
 (def ^:dynamic *base-url* "https://api.digitalocean.com")
 
+(defn- transform-key
+  ([key f]
+     (-> key name f keyword)))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defn- fix-keyword
-  "Takes a parameter name and replaces the - with a _"
-  [param-name]
-  (keyword (.replace (name param-name) \- \_)))
+(defn clojurize [name]
+  (.replace name "_" "-"))
 
-(defn- transform-map
-  "transforms a clojure map into something that can be sent to a
-  web server as query-params"
-  [params]
-  (into {} (for [[k v] params] [(fix-keyword (name k)) v])))
+(defn snakecaseize [name]
+  (.replace name "-" "_"))
+
+(defn deep-transform-keys [m f]
+  "Walks map m and applies transformation function to each key. If value is a map, recursively transforms it, too."
+  (w/postwalk (fn [x] (if (keyword? x) (transform-key x f) x)) m))
+
+(defn- plural [word]
+  (str word \s))
 
 (defn- api-get [entity creds & [entity-id]]
-  (client/get (apply str (interpose "/" [*base-url* (name entity) entity-id]))
-              {:as :auto
-               :query-params (transform-map creds)}))
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (let [response (client/get (apply str (interpose "/" [*base-url* (-> entity name snakecaseize) entity-id]))
+                             {:as :auto
+                              :query-params (deep-transform-keys creds snakecaseize)})]
+    (if (= "OK" (get-in response [:body :status]))
+      (deep-transform-keys response clojurize))))
 
-(def show-droplets (partial api-get :droplets))
+(defmacro defcollection [x]
+  "Usage: (defcollection droplets)"
+  `(defn ~x []
+     (get-in (api-get ~(keyword x) *credentials*) [:body ~(keyword x)])))
+
+(defmacro defitem [x]
+  "Usage: (defitem droplet)"
+  `(defn ~x [id#]
+     (get-in (api-get ~(-> x name plural keyword) *credentials* id#) [:body ~(keyword x)])))
+
+(def ^:dynamic *credentials* {:client-id ""
+                              :api-key ""})
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; High-level API
+(defcollection droplets)
+(defcollection regions)
+(defcollection images)
+(defcollection ssh-keys)
+(defcollection sizes)
+(defcollection domains)
+
+(defitem droplet)
+(defitem region)
+(defitem image)
+(defitem ssh-key)
+(defitem size)
+(defitem domain)
+(defitem event)
