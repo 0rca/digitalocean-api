@@ -15,10 +15,11 @@
   web server as query-params"
   [params]
   (into {} (for [[k v] params] [(fix-keyword (name k)) v])))
+
+(defn- api-get [entity creds & [entity-id]]
+  (client/get (apply str (interpose "/" [*base-url* (name entity) entity-id]))
+              {:as :auto
+               :query-params (transform-map creds)}))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn show-droplets [creds & droplet-id]
-  (let [droplet-id (or (first droplet-id) nil)]
-  (client/get (apply str (interpose "/" [*base-url* "droplets" droplet-id]))
-              {:as :auto
-               :query-params (transform-map creds)})))
+(def show-droplets (partial api-get :droplets))
