@@ -15,7 +15,10 @@
   (.replace name "-" "_"))
 
 (defn deep-transform-keys [m f]
-  "Walks map m and applies transformation function to each key. If value is a map, recursively transforms it, too."
+  "Walks map m and applies transformation function to each key. If value is a
+  map, recursively transforms it, too.
+  Caveat: may transform values, too. However, those should hardly appear as
+  keywords"
   (w/postwalk (fn [x] (if (keyword? x) (transform-key x f) x)) m))
 
 (defn- plural [word]
@@ -57,3 +60,14 @@
 (defitem size)
 (defitem domain)
 (defitem event)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Support for API v0.1.0
+;;
+(defn show-droplets [creds & [id]]
+  (binding [*credentials* creds]
+    (if (nil? droplet-id)
+      (droplets)
+      (droplet id))))
+
