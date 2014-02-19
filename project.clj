@@ -1,6 +1,6 @@
 (defproject digitalocean-api "0.2.0"
   :description "digital ocean cloud service API wrapper"
-  :url "https://github.com/r4vi/digitalocean-api"
+  :url "https://github.com/0rca/digitalocean-api"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.5.1"]
