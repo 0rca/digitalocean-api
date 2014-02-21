@@ -67,7 +67,7 @@
 ;;
 (defn show-droplets [creds & [id]]
   (binding [*credentials* creds]
-    (if (nil? droplet-id)
+    (if (nil? id)
       (droplets)
       (droplet id))))
 
