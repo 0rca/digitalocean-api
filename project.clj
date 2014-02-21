@@ -1,4 +1,4 @@
-(defproject digitalocean-api "0.2.0"
+(defproject digitalocean-api "0.2.1"
   :description "digital ocean cloud service API wrapper"
   :url "https://github.com/0rca/digitalocean-api"
   :license {:name "Eclipse Public License"
