@@ -1,3 +1,5 @@
+DEPRECATED in favour of [https://github.com/owainlewis/digital-ocean](https://github.com/owainlewis/digital-ocean)
+
 # digitalocean-api
 
 A Clojure library designed to ... well, that part is up to you.
